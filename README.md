@@ -1,2 +1,2 @@
-# WBInternship
+# wb-internship
 wieldberries internship
