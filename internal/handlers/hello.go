@@ -19,8 +19,8 @@ func NewHello(l *log.Logger) *Hello {
 	}
 }
 
-// ServeHTTP ...
-func (h Hello) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+// Hello ...
+func (h *Hello) Hello(rw http.ResponseWriter, r *http.Request) {
 	h.logger.Println("home route called")
 
 	d, err := ioutil.ReadAll(r.Body)

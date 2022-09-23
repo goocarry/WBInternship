@@ -12,8 +12,8 @@ func main() {
 	log.Print("config initializing")
 	cfg := config.GetConfig()
 
-	log.Print("logger initializing")
-	logger := log.New(os.Stdout, "api", log.LstdFlags)
+	log.Println("logger initializing")
+	logger := log.New(os.Stdout, "api \n", log.LstdFlags)
 
 	app, err := service.NewService(cfg, logger)
 	if err != nil {

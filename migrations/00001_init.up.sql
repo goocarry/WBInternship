@@ -8,8 +8,6 @@ SET search_path = public,
     extensions;
 SET default_tablespace = '';
 SET default_with_oids = FALSE;
--- EXTENSIONS --
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- TABLES --
 CREATE TABLE public.customer (customer_id TEXT PRIMARY KEY);
 CREATE TABLE public.order (
@@ -27,7 +25,7 @@ CREATE TABLE public.order (
     oof_shard TEXT
 );
 CREATE TABLE public.delivery (
-    order_uid REFERENCES public.order (order_uid),
+    order_uid TEXT REFERENCES public.order (order_uid),
     name TEXT,
     phone TEXT,
     zip TEXT,
@@ -37,7 +35,7 @@ CREATE TABLE public.delivery (
     email TEXT
 );
 CREATE TABLE public.payment (
-    order_uid REFERENCES public.order (order_uid),
+    order_uid TEXT REFERENCES public.order (order_uid),
     transaction TEXT,
     request_id TEXT,
     currency TEXT,
