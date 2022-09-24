@@ -8,9 +8,11 @@ import (
 
 	"github.com/goocarry/wb-internship/internal/config"
 	"github.com/goocarry/wb-internship/internal/handlers"
+	"github.com/goocarry/wb-internship/internal/queue"
 	"github.com/goocarry/wb-internship/internal/store"
 	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	stan "github.com/nats-io/stan.go"
 )
 
 // Service ...
@@ -54,6 +56,26 @@ func (s *Service) Run() error {
 	if err != nil {
 		return err
 	}
+
+	queue, err := queue.New(s.cfg, s.logger)
+	if err != nil {
+		return err
+	}
+
+	// Simple Synchronous Publisher
+	queue.NConn.Publish("foo", []byte("Hello World")) // does not return until an ack has been received from NATS Streaming
+
+	s.logger.Println("info-asd9g21d: subscribing to NATS")
+	_, _ = queue.NConn.Subscribe("foo", func(m *stan.Msg) {
+		fmt.Printf("Received a message: %s\n", string(m.Data))
+	}, stan.DeliverAllAvailable())
+
+	// Simple Synchronous Publisher
+	queue.NConn.Publish("foo", []byte("Hello World"))
+	queue.NConn.Publish("foo", []byte("Hello World"))
+	queue.NConn.Publish("foo", []byte("Hello World"))
+	queue.NConn.Publish("foo", []byte("Hello World"))
+	queue.NConn.Publish("foo", []byte("Hello World"))
 
 	defer s.store.Close()
 

@@ -13,7 +13,7 @@ func main() {
 	cfg := config.GetConfig()
 
 	log.Println("logger initializing")
-	logger := log.New(os.Stdout, "api \n", log.LstdFlags)
+	logger := log.New(os.Stdout, "api: ", log.LstdFlags)
 
 	app, err := service.NewService(cfg, logger)
 	if err != nil {

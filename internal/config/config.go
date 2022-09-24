@@ -20,9 +20,11 @@ type AppConfig struct {
 
 // Config ...
 type Config struct {
-	Listen      Listen
-	AppConfig   AppConfig
-	PostgresURL string `env:"POSTGRES_URL"`
+	Listen        Listen
+	AppConfig     AppConfig
+	PostgresURL   string `env:"POSTGRES_URL"`
+	NATSClusterID string `env:"NATS_CLUSTER_ID" env-default:"test-cluster"`
+	NATSClientID  string `env:"NATS_CLIENT_ID" env-default:"wbl0natsclient"`
 }
 
 var instance *Config
