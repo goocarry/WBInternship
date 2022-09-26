@@ -54,28 +54,18 @@ func NewService(config *config.Config, logger *log.Logger) (*Service, error) {
 func (s *Service) Run() error {
 	err := s.store.Open()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
 	queue, err := queue.New(s.cfg, s.logger)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
-	// Simple Synchronous Publisher
-	queue.NConn.Publish("foo", []byte("Hello World")) // does not return until an ack has been received from NATS Streaming
-
 	s.logger.Println("info-asd9g21d: subscribing to NATS")
-	_, _ = queue.NConn.Subscribe("foo", func(m *stan.Msg) {
+	_, _ = queue.NConn.Subscribe("wbl0topic", func(m *stan.Msg) {
 		fmt.Printf("Received a message: %s\n", string(m.Data))
 	}, stan.DeliverAllAvailable())
-
-	// Simple Synchronous Publisher
-	queue.NConn.Publish("foo", []byte("Hello World"))
-	queue.NConn.Publish("foo", []byte("Hello World"))
-	queue.NConn.Publish("foo", []byte("Hello World"))
-	queue.NConn.Publish("foo", []byte("Hello World"))
-	queue.NConn.Publish("foo", []byte("Hello World"))
 
 	defer s.store.Close()
 

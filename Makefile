@@ -11,8 +11,11 @@ $(APP_BIN):
 clean:
 	rm -rf ./build || true
 
-devdb:
-	export POSTGRESQL_URL='postgres://wbl0user:postgres@localhost:5432/wbl0?sslmode=disable'
+dev:
+	export POSTGRES_URL='postgres://wbl0user:postgres@localhost:5432/wbl0?sslmode=disable' && go run cmd/main.go
 
-testdb:
-	export POSTGRESQL_URL='postgres://postgres:postgres@localhost:5432/wbl0_test?sslmode=disable'
+test:
+	export POSTGRES_URL='postgres://postgres:postgres@localhost:5432/wbl0_test?sslmode=disable' && go run cmd/main.go
+
+pub:
+	go run publisher/pub.go

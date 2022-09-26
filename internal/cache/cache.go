@@ -7,6 +7,8 @@ import (
 	"github.com/goocarry/wb-internship/internal/model"
 )
 
+// TODO: use interface
+
 // Cache ...
 type Cache struct {
 	sync.RWMutex
