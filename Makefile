@@ -19,3 +19,6 @@ test:
 
 pub:
 	go run publisher/pub.go
+
+batch: 
+	./batch.sh

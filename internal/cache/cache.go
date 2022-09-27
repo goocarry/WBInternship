@@ -2,7 +2,6 @@ package cache
 
 import (
 	"sync"
-	"time"
 
 	"github.com/goocarry/wb-internship/internal/model"
 )
@@ -16,7 +15,7 @@ type Cache struct {
 }
 
 // New ...
-func New(defaultExpiration, cleanupInterval time.Duration) *Cache {
+func New() *Cache {
 
 	orders := make(map[string]model.Order)
 
@@ -52,4 +51,14 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 	}
 
 	return order, true
+}
+
+// SetAll ...
+func (c *Cache) SetAll(orders map[string]model.Order) {
+
+	c.Lock()
+
+	defer c.Unlock()
+
+	c.orders = orders
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/goocarry/wb-internship/internal/model"
+	"github.com/google/uuid"
 	"github.com/nats-io/stan.go"
 )
 
@@ -18,7 +19,10 @@ func main() {
 	}
 	order := model.Order{}
 
-	_ = json.Unmarshal([]byte(file), &order)
+	json.Unmarshal([]byte(file), &order)
+	order.OrderUID = uuid.New().String()
+	updatedOrder, _ := json.Marshal(order)
+
 	fmt.Println("Order Id: ", order.OrderUID)
 
 	sc, err := stan.Connect("test-cluster", "wbl0natspublisher")
@@ -27,12 +31,10 @@ func main() {
 	}
 	defer sc.Close()
 
-	// err = sc.Publish("wbl0topic", []byte("PUBLISHER"))
-	err = sc.Publish("wbl0topic", file)
+	err = sc.Publish("wbl0topic", updatedOrder)
 	if err != nil {
 		log.Fatalf("Error during publish: %v\n", err)
 	}
-	// log.Printf("Published [%s] : '%s'\n", "foo", []byte("PUBLISHER"))
-	log.Printf("Published [%s] : '%s'\n", "wbl0topic", "model.json")
+	log.Printf("Published [%s] : '%s'\n", "wbl0topic", order.OrderUID)
 
 }

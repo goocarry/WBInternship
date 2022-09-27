@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/goocarry/wb-internship/internal/config"
-	// nats "github.com/nats-io/nats.go"
 	stan "github.com/nats-io/stan.go"
 )
 

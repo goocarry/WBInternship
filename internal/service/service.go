@@ -1,13 +1,17 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
+
 	"net/http"
 
+	"github.com/goocarry/wb-internship/internal/cache"
 	"github.com/goocarry/wb-internship/internal/config"
 	"github.com/goocarry/wb-internship/internal/handlers"
+	"github.com/goocarry/wb-internship/internal/model"
 	"github.com/goocarry/wb-internship/internal/queue"
 	"github.com/goocarry/wb-internship/internal/store"
 	gorillaHandlers "github.com/gorilla/handlers"
@@ -28,12 +32,6 @@ func NewService(config *config.Config, logger *log.Logger) (*Service, error) {
 
 	// create the store
 	store := store.New(config)
-	// err := store.Open()
-	// if err != nil {
-	// 	return &Service{}, err
-	// }
-
-	// defer store.Close()
 
 	// create the router
 	router := mux.NewRouter()
@@ -52,11 +50,21 @@ func NewService(config *config.Config, logger *log.Logger) (*Service, error) {
 
 // Run ...
 func (s *Service) Run() error {
+	// open db connection
 	err := s.store.Open()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// new cache instance
+	cache := cache.New()
+	dborders, err := s.store.Order().GetAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+	cache.SetAll(dborders)
+
+	// init nats connection
 	queue, err := queue.New(s.cfg, s.logger)
 	if err != nil {
 		log.Fatal(err)
@@ -64,10 +72,29 @@ func (s *Service) Run() error {
 
 	s.logger.Println("info-asd9g21d: subscribing to NATS")
 	_, _ = queue.NConn.Subscribe("wbl0topic", func(m *stan.Msg) {
+		newOrder := &model.Order{}
 		fmt.Printf("Received a message: %s\n", string(m.Data))
-	}, stan.DeliverAllAvailable())
+		json.Unmarshal([]byte(m.Data), newOrder)
+
+		_, exist := cache.Get(newOrder.OrderUID)
+		if exist != false {
+			log.Printf("order with this order_uid already exists: %s\n", newOrder.OrderUID)
+			return
+		}
+
+		// add neworder to cache
+		cache.Set(newOrder.OrderUID, newOrder)
+
+		// save neworder to pg
+		_, err := s.store.Order().Create(newOrder)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	}, stan.StartWithLastReceived())
 
 	defer s.store.Close()
+	defer queue.NConn.Close()
 
 	return s.startHTTP()
 }
