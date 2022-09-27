@@ -1,7 +1,11 @@
 #!/bin/bash
 
-for i in {1..10}
+start=`date +%s.%N`
+
+for i in {1..10000}
 do 
-    echo "$i"
     make pub & 
 done
+
+end=`date +%s.%N`
+runtime=$( echo "time: $end - $start" | bc -l )

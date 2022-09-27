@@ -14,7 +14,6 @@ import (
 	"github.com/goocarry/wb-internship/internal/model"
 	"github.com/goocarry/wb-internship/internal/queue"
 	"github.com/goocarry/wb-internship/internal/store"
-	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	stan "github.com/nats-io/stan.go"
 )
@@ -24,6 +23,7 @@ type Service struct {
 	cfg    *config.Config
 	logger *log.Logger
 	store  *store.Store
+	cache  *cache.Cache
 	router *mux.Router
 }
 
@@ -33,6 +33,9 @@ func NewService(config *config.Config, logger *log.Logger) (*Service, error) {
 	// create the store
 	store := store.New(config)
 
+	// create the cache
+	cache := cache.New()
+
 	// create the router
 	router := mux.NewRouter()
 
@@ -40,10 +43,11 @@ func NewService(config *config.Config, logger *log.Logger) (*Service, error) {
 		cfg:    config,
 		logger: logger,
 		store:  store,
+		cache:  cache,
 		router: router,
 	}
 
-	service.configureRoutes(logger, store)
+	service.configureRoutes(logger, store, cache)
 
 	return service, nil
 }
@@ -56,13 +60,11 @@ func (s *Service) Run() error {
 		log.Fatal(err)
 	}
 
-	// new cache instance
-	cache := cache.New()
 	dborders, err := s.store.Order().GetAll()
 	if err != nil {
 		log.Fatal(err)
 	}
-	cache.SetAll(dborders)
+	s.cache.SetAll(dborders)
 
 	// init nats connection
 	queue, err := queue.New(s.cfg, s.logger)
@@ -76,14 +78,14 @@ func (s *Service) Run() error {
 		fmt.Printf("Received a message: %s\n", string(m.Data))
 		json.Unmarshal([]byte(m.Data), newOrder)
 
-		_, exist := cache.Get(newOrder.OrderUID)
+		_, exist := s.cache.Get(newOrder.OrderUID)
 		if exist != false {
 			log.Printf("order with this order_uid already exists: %s\n", newOrder.OrderUID)
 			return
 		}
 
 		// add neworder to cache
-		cache.Set(newOrder.OrderUID, newOrder)
+		s.cache.Set(newOrder.OrderUID, newOrder)
 
 		// save neworder to pg
 		_, err := s.store.Order().Create(newOrder)
@@ -100,14 +102,12 @@ func (s *Service) Run() error {
 }
 
 // configureRoutes ...
-func (s *Service) configureRoutes(logger *log.Logger, store *store.Store) {
+func (s *Service) configureRoutes(logger *log.Logger, store *store.Store, cache *cache.Cache) {
 	// create the handlers
-	helloHandler := handlers.NewHello(logger)
-	orderHandler := handlers.NewOrder(logger, store)
+	orderHandler := handlers.NewOrder(logger, store, cache)
 
-	s.router.Use(gorillaHandlers.CORS(gorillaHandlers.AllowedOrigins([]string{"*"})))
-	s.router.HandleFunc("/", helloHandler.Hello)
 	s.router.HandleFunc("/order", orderHandler.CreateOrder).Methods("POST")
+	s.router.HandleFunc("/order/{id}", orderHandler.GetOrder)
 }
 
 // startHTTP ...

@@ -18,7 +18,7 @@ test:
 	export POSTGRES_URL='postgres://postgres:postgres@localhost:5432/wbl0_test?sslmode=disable' && go run cmd/main.go
 
 pub:
-	go run publisher/pub.go
+	./publisher/publisher
 
 batch: 
 	./batch.sh

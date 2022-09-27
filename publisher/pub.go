@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/goocarry/wb-internship/internal/model"
 	"github.com/google/uuid"
@@ -13,7 +13,8 @@ import (
 
 func main() {
 
-	file, err := ioutil.ReadFile("model.json")
+	pwd, _ := os.Getwd()
+	file, err := ioutil.ReadFile(pwd + "/publisher/model.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,9 +24,7 @@ func main() {
 	order.OrderUID = uuid.New().String()
 	updatedOrder, _ := json.Marshal(order)
 
-	fmt.Println("Order Id: ", order.OrderUID)
-
-	sc, err := stan.Connect("test-cluster", "wbl0natspublisher")
+	sc, err := stan.Connect("test-cluster", uuid.New().String())
 	if err != nil {
 		log.Fatalf("Can't connect: %v.\nMake sure a NATS Streaming Server is running at: %s", err, stan.DefaultNatsURL)
 	}
@@ -35,6 +34,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error during publish: %v\n", err)
 	}
-	log.Printf("Published [%s] : '%s'\n", "wbl0topic", order.OrderUID)
+	// log.Printf("Published [%s] : '%s'\n", "wbl0topic", order.OrderUID)
 
 }

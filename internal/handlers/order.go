@@ -6,21 +6,25 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/goocarry/wb-internship/internal/cache"
 	"github.com/goocarry/wb-internship/internal/model"
 	"github.com/goocarry/wb-internship/internal/store"
+	"github.com/gorilla/mux"
 )
 
 // Order ...
 type Order struct {
 	logger *log.Logger
 	store  *store.Store
+	cache  *cache.Cache
 }
 
 // NewOrder ...
-func NewOrder(l *log.Logger, s *store.Store) *Order {
+func NewOrder(l *log.Logger, s *store.Store, c *cache.Cache) *Order {
 	return &Order{
 		logger: l,
 		store:  s,
+		cache:  c,
 	}
 }
 
@@ -44,5 +48,21 @@ func (o *Order) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	o.logger.Println("info-f8a835a5: new order created")
-	fmt.Fprint(rw, "new order created")
+	fmt.Fprint(rw, "new order created", http.StatusOK)
+}
+
+// GetOrder ...
+func (o *Order) GetOrder(rw http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+
+	o.logger.Printf("info-b23e7145: get order: %s", params["id"])
+
+	order, exists := o.cache.Get(params["id"])
+	if exists {
+		fmt.Fprintf(rw, "order: %v", order)
+	} else {
+		fmt.Fprint(rw, "order not found", http.StatusOK)
+	}
+
 }
