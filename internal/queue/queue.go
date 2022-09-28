@@ -31,12 +31,12 @@ func connect(config *config.Config, logger *log.Logger) stan.Conn {
 
 	conn, err = stan.Connect(config.NATSClusterID, config.NATSClientID, stan.Pings(1, 2),
 		stan.SetConnectionLostHandler(func(_ stan.Conn, reason error) {
-			log.Fatalf("Connection lost, reason: %v", reason)
+			logger.Fatalf("err-feca3aa0: connection lost, reason: %v", reason)
 		}))
 	if err != nil {
-		log.Fatalf("Can't connect: %v.\nMake sure a NATS Streaming Server is running at: %s", err, stan.DefaultNatsURL)
+		logger.Fatalf("err-10b56d01: can't connect: %v,\nmake sure a NATS Streaming Server is running at: %s", err, stan.DefaultNatsURL)
 	}
-	log.Printf("Connected to %s clusterID: [%s] clientID: [%s]\n", stan.DefaultNatsURL, config.NATSClusterID, config.NATSClientID)
+	logger.Printf("info-45448a99: connected to %s clusterID: [%s] clientID: [%s]\n", stan.DefaultNatsURL, config.NATSClusterID, config.NATSClientID)
 
 	return conn
 }

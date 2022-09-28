@@ -33,12 +33,12 @@ var once sync.Once
 // GetConfig ...
 func GetConfig() *Config {
 	once.Do(func() {
-		log.Print("Gather config")
+		log.Print("info-34a630a8: gather config")
 
 		instance = &Config{}
 
 		if err := cleanenv.ReadEnv(instance); err != nil {
-			helpText := "System notes"
+			helpText := "system"
 			help, _ := cleanenv.GetDescription(instance, &helpText)
 			log.Print(help)
 			log.Fatal(err)

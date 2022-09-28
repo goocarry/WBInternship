@@ -30,6 +30,7 @@ type Service struct {
 // NewService ...
 func NewService(config *config.Config, logger *log.Logger) (*Service, error) {
 
+	logger.Println("info-8e0b1b3b: creating new service")
 	// create the store
 	store := store.New(config)
 
@@ -112,11 +113,11 @@ func (s *Service) configureRoutes(logger *log.Logger, store *store.Store, cache 
 
 // startHTTP ...
 func (s *Service) startHTTP() error {
-	s.logger.Println("Start HTTP")
+	s.logger.Println("info-b0f45365: start HTTP")
 
 	var listener net.Listener
 
-	s.logger.Printf("Bind application to host: %s and port: %s", s.cfg.Listen.BindIP, s.cfg.Listen.Port)
+	s.logger.Printf("info-af3aaf35: bind application to host: %s and port: %s", s.cfg.Listen.BindIP, s.cfg.Listen.Port)
 	var err error
 	listener, err = net.Listen("tcp", fmt.Sprintf("%s:%s", s.cfg.Listen.BindIP, s.cfg.Listen.Port))
 	if err != nil {

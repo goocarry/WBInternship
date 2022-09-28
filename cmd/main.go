@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	log.Print("config initializing")
+	log.Print("info-a9fb8cec: init config")
 	cfg := config.GetConfig()
 
-	log.Println("logger initializing")
+	log.Println("info-1bf4eefa: init logger")
 	logger := log.New(os.Stdout, "api_logger: ", log.LstdFlags)
 
 	app, err := service.NewService(cfg, logger)
@@ -20,6 +20,6 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	logger.Println("Running Application")
+	logger.Println("info-395c0c9c: app is running")
 	app.Run()
 }
