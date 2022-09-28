@@ -10,7 +10,7 @@ import (
 
 func TestOrderRepository_Create(t *testing.T) {
 	s, teardown := store.TestStore(t, dsn)
-	defer teardown("order")
+	defer teardown("order_cache")
 
 	o, err := s.Order().Create(&model.Order{
 		OrderUID: "testorder321",
