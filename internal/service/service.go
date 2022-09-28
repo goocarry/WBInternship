@@ -112,7 +112,11 @@ func (s *Service) startHTTP() error {
 func (s *Service) onMessage(m *stan.Msg) {
 	newOrder := &model.Order{}
 	s.logger.Printf("info-df0d62b3: received a message: %s\n", string(m.Data))
-	json.Unmarshal([]byte(m.Data), newOrder)
+	err := json.Unmarshal([]byte(m.Data), newOrder)
+	if err != nil || newOrder.OrderUID == "" {
+		s.logger.Printf("err-e4b02fb1: order data is not valid")
+		return
+	}
 
 	_, exist := s.cache.Get(newOrder.OrderUID)
 	if exist != false {
@@ -124,7 +128,7 @@ func (s *Service) onMessage(m *stan.Msg) {
 	s.cache.Set(newOrder.OrderUID, newOrder)
 
 	// save neworder to pg
-	_, err := s.store.Order().Create(newOrder)
+	_, err = s.store.Order().Create(newOrder)
 	if err != nil {
 		s.logger.Fatal(err)
 	}
