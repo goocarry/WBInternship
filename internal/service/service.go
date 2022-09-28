@@ -61,11 +61,11 @@ func (s *Service) Run() error {
 		log.Fatal(err)
 	}
 
-	// dborders, err := s.store.Order().GetAll()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// s.cache.SetAll(dborders)
+	dborders, err := s.store.Order().GetAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+	s.cache.SetAll(dborders)
 
 	// init nats connection
 	queue, err := queue.New(s.cfg, s.logger)
