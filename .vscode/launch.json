@@ -6,7 +6,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "/home/stanislav/go/src/github.com/goocarry/wb-internship/cmd/",
+            "program": "/Users/stas/go/src/github.com/goocarry/wb-internship/cmd/",
             "env": {
                 "POSTGRES_URL":"postgres://wbl0user:postgres@localhost:5432/wbl0?sslmode=disable",
             }

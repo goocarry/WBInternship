@@ -27,17 +27,17 @@ func New() *Cache {
 }
 
 // Set ...
-func (c *Cache) Set(key string, value interface{}) {
+func (c *Cache) Set(key string, value *model.Order) {
 
 	c.Lock()
 
 	defer c.Unlock()
 
-	c.orders[key] = model.Order{}
+	c.orders[key] = *value
 }
 
 // Get ...
-func (c *Cache) Get(key string) (interface{}, bool) {
+func (c *Cache) Get(key string) (*model.Order, bool) {
 
 	c.RLock()
 
@@ -50,7 +50,7 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 		return nil, false
 	}
 
-	return order, true
+	return &order, true
 }
 
 // SetAll ...
