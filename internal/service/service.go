@@ -74,27 +74,7 @@ func (s *Service) Run() error {
 	}
 
 	s.logger.Println("info-asd9g21d: subscribing to NATS")
-	_, _ = queue.NConn.Subscribe("wbl0topic", func(m *stan.Msg) {
-		newOrder := &model.Order{}
-		fmt.Printf("Received a message: %s\n", string(m.Data))
-		json.Unmarshal([]byte(m.Data), newOrder)
-
-		_, exist := s.cache.Get(newOrder.OrderUID)
-		if exist != false {
-			log.Printf("order with this order_uid already exists: %s\n", newOrder.OrderUID)
-			return
-		}
-
-		// add neworder to cache
-		s.cache.Set(newOrder.OrderUID, newOrder)
-
-		// save neworder to pg
-		_, err := s.store.Order().Create(newOrder)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-	}, stan.StartWithLastReceived())
+	_, _ = queue.NConn.Subscribe("wbl0topic", s.onMessage, stan.StartWithLastReceived())
 
 	defer s.store.Close()
 	defer queue.NConn.Close()
@@ -124,7 +104,28 @@ func (s *Service) startHTTP() error {
 		s.logger.Fatal(err)
 	}
 
-	s.logger.Println("Application completely initialized and started")
+	s.logger.Println("info-9faad0c7: application completely initialized")
 
 	return http.Serve(listener, s.router)
+}
+
+func (s *Service) onMessage(m *stan.Msg) {
+	newOrder := &model.Order{}
+	s.logger.Printf("info-df0d62b3: received a message: %s\n", string(m.Data))
+	json.Unmarshal([]byte(m.Data), newOrder)
+
+	_, exist := s.cache.Get(newOrder.OrderUID)
+	if exist != false {
+		s.logger.Printf("info-f9358936: order with this order_uid already exists: %s\n", newOrder.OrderUID)
+		return
+	}
+
+	// add neworder to cache
+	s.cache.Set(newOrder.OrderUID, newOrder)
+
+	// save neworder to pg
+	_, err := s.store.Order().Create(newOrder)
+	if err != nil {
+		s.logger.Fatal(err)
+	}
 }
