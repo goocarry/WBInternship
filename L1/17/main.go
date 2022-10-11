@@ -3,11 +3,17 @@ package main
 import "fmt"
 
 func main() {
+	// only for sorted array
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8}
 	num := 8
 
 	index := binarySearch(nums, num, 0, len(nums)-1)
-	fmt.Println(index)
+	
+	if index > 0 {
+		fmt.Println("index", index)
+	} else {
+		fmt.Println("number not found")
+	}
 }
 
 // iterative method

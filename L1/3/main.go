@@ -6,7 +6,6 @@ import (
 	"sync"
 )
 
-// super bad solution, needs to be reworked with channels
 func main() {
 	var result int
 	var wg sync.WaitGroup
@@ -32,6 +31,6 @@ func main() {
 }
 
 func square(i int, resultSlice []int, pos int, wg *sync.WaitGroup) {
-	defer wg.Done()
 	resultSlice[pos] = i * i
+	wg.Done()
 }
